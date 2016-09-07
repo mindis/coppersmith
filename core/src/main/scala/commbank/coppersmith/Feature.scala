@@ -144,6 +144,10 @@ object Feature {
   // Legal type/value combinations
   @implicitNotFound("Features with value type ${V} cannot be ${T}")
   abstract class Conforms[T <: Type : TypeTag, V <: Value : TypeTag] {
+    // This typeTagClass lookup needs to be done at initialisation time (ie, as a val, not a
+    // def) to avoid an apparent race condition that occurs when writing metadata for multiple
+    // feature sets that are executed in parallel. For more context, see:
+    // https://github.com/CommBank/coppersmith/pull/80
     val typeTagClass: Class[_] = {
       val tag: TypeTag[T] = implicitly
       tag.mirror.runtimeClass(tag.tpe.typeSymbol.asClass)
